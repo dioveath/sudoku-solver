@@ -66,26 +66,6 @@ window.onload = function(){
     return possibleValues;
   }
 
-  function generateSudoku(){
-    let sudoku = new Array();
-    for(let i = 0; i < 9; i++)
-      sudoku[i] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-    let iter = 2;
-    for(let k = 0; k < iter; k++){
-      for(let i = 0; i < 9; i+=3){
-        for(let j = 0; j < 9; j+=3){
-          let x = j + Math.floor(Math.random() * 3);
-          let y = i + Math.floor(Math.random() * 3);
-          let pValues = getPossibleValues(sudoku, x, y);
-          if(pValues.length <= 1) continue;
-          sudoku[y][x] = pValues[Math.floor(Math.random() * pValues.length)];
-        }
-      }
-    }
-
-    return sudoku;
-  }
 
   var solvableSoduko = [
     [5, 3, 0,  0, 7, 0,  0, 0, 0], 
