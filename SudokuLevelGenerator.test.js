@@ -144,9 +144,17 @@ window.onload = () => {
             puzzle[i][j] = pValues.length == 1 ? pValues[0] : pValues;
           }
 	}
-      }      
+      }    
     }
     return puzzle;
+  }
+
+  function backtrack(puzzle){
+    for(let i = 0; i < 9; i++){
+      for(let j = 0; j < 9; j++){
+        
+      } 
+    }
   }
 
   function printPuzzle(puzzle){
