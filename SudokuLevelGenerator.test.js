@@ -151,12 +151,6 @@ window.onload = () => {
 
   function isValidMove(puzzle, x, y, number){
     if(puzzle[y][x] != 0) return true;
-    let h = [];
-    let v = [];
-    let c = [];
-    let sx = x % 3;
-    let sy = y % 3;
-
 
     for(let i = 0; i < 9; i++){
       if(puzzle[y][i] != 0 || puzzle[y][i] !== undefined)
@@ -179,37 +173,43 @@ window.onload = () => {
     return true;
   }
 
+
+  // procedure backtrack(c) is
+  //     if reject(P, c) then return
+  //     if accept(P, c) then output(P, c)
+  //     s ← first(P, c)
+  //     while s ≠ NULL do
+  //         backtrack(s)
+  //         s ← next(P, s)  
+
   function backtrack(puzzle){
+    if(isSudokuValid(puzzle)) return puzzle;
     let solvedPuzzle = puzzle.map(arr => arr.slice());
-
-    console.log(solvedPuzzle);
-
     for(let i = 0; i < 9; i++){
       for(let j = 0; j < 9; j++){
         if(solvedPuzzle[i][j] != 0) continue;
-
-        let gotValid = false;
+        let solvable = false;
         for(let k = 1; k <= 9; k++){
           if(isValidMove(solvedPuzzle, j, i, k)) {
-            solvedPuzzle[i][j] = k;
-            gotValid = true;
-            console.log("aaae;");
-            break;
+            let newPuzzle = solvedPuzzle.map(arr => arr.slice());
+            newPuzzle[i][j] = k;
+            let backTracked = backtrack(newPuzzle);
+            if(backTracked == false) continue;
+            else return backTracked;
+            solvable = true;
           }
         }
 
-        if(!gotValid) {
-          console.log(i, j);
-          console.log("notValid: " + solvedPuzzle[i][j]);
-          return false;
-        }
+        if(!solvable) return false;
       } 
     }
+
     return solvedPuzzle;
   }
 
+  var printCounter = 0;
   function printPuzzle(puzzle){
-    var stringOutput = "";
+    var stringOutput = "<b>" + ++printCounter + ". </b> <br> <br/>";
     for(var i = 0; i < 9; i ++){
       for(var j = 0; j < 9; j++){
         stringOutput += JSON.stringify(puzzle[i][j]) + "--";
@@ -223,13 +223,13 @@ window.onload = () => {
 
    let sudoku1 = [
     [5, 3, 4, 6, 7, 8, 9, 1, 2],
-    [6, 7, 2, 1, 9, 5, 3, 4, 8],
+    [0, 0, 0, 0, 0, 0, 0, 0, 8],
     [1, 9, 8, 3, 4, 2, 5, 6, 7],
     [8, 5, 9, 7, 6, 1, 4, 2, 3],
-    [4, 2, 6, 8, 5, 3, 7, 9, 1],
+    [0, 0, 0, 0, 0, 0, 0, 9, 1],
     [7, 1, 3, 9, 2, 4, 8, 5, 6],
     [9, 6, 1, 5, 3, 7, 2, 8, 4],
-    [2, 8, 7, 4, 1, 9, 6, 3, 5],
+    [0, 0, 0, 0, 0, 0, 0, 0, 5],
     [3, 4, 5, 2, 8, 6, 1, 7, 0]
    ];
 
@@ -264,7 +264,17 @@ window.onload = () => {
   // printPuzzle(sudoku(generateSudoku()));
   // printPuzzle(isSudokuValid(sudoku(generateSudoku())));
   // console.log(suffle([1, 2, 3, 4, 5, 6, 7, 8, 9]));
+// 5--3--4--6--7--8--9--1--2--
+// 6--7--2--1--9--5--3--4--8--
+// 1--9--8--3--4--2--5--6--7--
+// 8--5--9--7--6--1--4--2--3--
+// 4--2--6--8--5--3--7--9--1--
+// 7--1--3--9--2--4--8--5--6--
+// 9--6--1--5--3--7--2--8--4--
+// 2--8--7--4--1--9--6--3--5--
+// 3--4--5--2--8--6--1--7--9--
 
-  console.log(backtrack(easySolvableSoduko));
+
+  printPuzzle(backtrack(sudoku1));
 
 };  
