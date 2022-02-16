@@ -18,10 +18,10 @@ window.onload = () => {
     return true;
   }
 
-  function sudoku(puzzle) {
-    var iteration = 30;
+  function sudokuSolve(toSolvePuzzle) {
+    let puzzle = toSolvePuzzle.map(arr => arr.slice());
+    var iteration = 5;
     for(var iter = 0; iter < iteration; iter++){
-      printPuzzle(puzzle);
       for(var i = 0; i < 9; i++){
 	for(var j = 0; j < 9; j++){
           if(puzzle[i][j] == 0 || puzzle[i][j] instanceof Array) {
@@ -34,7 +34,7 @@ window.onload = () => {
     return puzzle;
   }
 
-  function generateSudoku(){
+  function generateSudoku(difficultyLevel = 20){
     let sudoku = [];
     for(let i = 0; i < 9; i++) {
       sudoku[i] = new Array();
@@ -42,35 +42,65 @@ window.onload = () => {
         sudoku[i][j] = [1, 2, 3, 4, 5, 6, 7, 8, 9];      
     }
 
-    let iter = 20;
-    for(let k = 0; k < iter; k++){
+    var backTrackedPuzzle = false;
+
+    while(!backTrackedPuzzle) {
+      // initial random one seed on all 3x3 boxes
+      let iter = 2;
+      for(let k = 0; k < iter; k++){
+        for(let i = 0; i < 9; i+=3){
+          for(let j = 0; j < 9; j+=3){
+            let x = j + Math.floor(Math.random() * 3);
+            let y = i + Math.floor(Math.random() * 3);
+            let pValues = getPossibleValues(sudoku, x, y);
+            if(!(pValues instanceof Array)) continue;
+            if(pValues.length == 1) {
+              sudoku[y][x] = pValues[0];
+              continue;
+            }
+            let shuffleArray =suffle(pValues);
+            sudoku[y][x] = pValues[0];
+          }
+        }
+      }
+
+      for(let i = 0; i < 9; i++){
+        for(let j = 0; j < 9; j++){
+          if(sudoku[i][j] instanceof Array) {
+            sudoku[i][j] = 0;
+          }
+        }
+      }
+
+      // backtracked puzzle
+      backTrackedPuzzle = backtrack(sudoku);
+    }
+
+
+    let iteration = 10;
+    for(let iter = 0; iter < iteration; iter++){
       for(let i = 0; i < 9; i+=3){
         for(let j = 0; j < 9; j+=3){
+          if(--difficultyLevel <= 0) return backTrackedPuzzle;
+
           let x = j + Math.floor(Math.random() * 3);
           let y = i + Math.floor(Math.random() * 3);
-          console.log(x, y);
-          let pValues = getPossibleValues(sudoku, x, y);
-          console.log("pValues: " + pValues);
-          if(!(pValues instanceof Array)) continue;
-          if(pValues.length == 1) {
-            sudoku[y][x] = pValues[0];
-            continue;
+
+          let temp = backTrackedPuzzle[y][x];
+          backTrackedPuzzle[y][x] = 0;
+          let oneStepRemovedBackTracked = sudokuSolve(backTrackedPuzzle);
+          printPuzzle(oneStepRemovedBackTracked);
+          if(!isSudokuValid(oneStepRemovedBackTracked)) {
+            backTrackedPuzzle[y][x] = temp;
+            return backTrackedPuzzle;
           }
-          let shuffleArray =suffle(pValues);
-          sudoku[y][x] = pValues[0];
         }
       }
     }
 
-    for(let i = 0; i < 9; i++){
-      for(let j = 0; j < 9; j++){
-        if(sudoku[i][j] instanceof Array) {
-          sudoku[i][j] = 0;
-        }
-      }
-    }
+    // printPuzzle(backTrackedPuzzle);
 
-    return sudoku;
+    return backTrackedPuzzle;
   }  
 
   function suffle(array){
@@ -85,7 +115,7 @@ window.onload = () => {
 
   function getPossibleValues(puzzle, x, y){
     var possibleValues = 0;
-    console.log("possibleValues: " + puzzle[y][x]);
+    // console.log("possibleValues: " + puzzle[y][x]);
     possibleValues = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
     // if(puzzle[y][x] == 0)
@@ -116,22 +146,8 @@ window.onload = () => {
     return possibleValues.length == 0 ? [0] : possibleValues;
   }
 
-  function isSodukoValid(board){
-    var sum = 45;
-    for(var i = 0; i < 9; i++){
-      var sumy = 0;
-      var sumx = 0;
-      var sumd = 0;
-      for(var j = 0; j < 9; j++) {
-        sumy += board[j][i];
-        sumx += board[i][j];
-        sumd += board[Math.floor(j/3)][j%3];
-      }
-
-      if(sumx != sum || sumx != sum || sumd != sum) return false;
-    }
-
-    return true;
+  function isSudokuSolvable(board){
+    return isSudokuValid(sudoku(board));
   }
 
   function sudoku(puzzle) {
@@ -189,16 +205,20 @@ window.onload = () => {
       for(let j = 0; j < 9; j++){
         if(solvedPuzzle[i][j] != 0) continue;
         let solvable = false;
-        for(let k = 1; k <= 9; k++){
-          if(isValidMove(solvedPuzzle, j, i, k)) {
+
+        // suffledPossibles for more random puzzle generation; 
+        let suffledPossibles = suffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        for(let k = 0; k < 9; k++){
+          if(isValidMove(solvedPuzzle, j, i, suffledPossibles[k])) {
             let newPuzzle = solvedPuzzle.map(arr => arr.slice());
-            newPuzzle[i][j] = k;
+            newPuzzle[i][j] = suffledPossibles[k];
             let backTracked = backtrack(newPuzzle);
             if(backTracked == false) continue;
             else return backTracked;
             solvable = true;
           }
         }
+
 
         if(!solvable) return false;
       } 
@@ -262,19 +282,25 @@ window.onload = () => {
   ];  
 
   // printPuzzle(sudoku(generateSudoku()));
-  // printPuzzle(isSudokuValid(sudoku(generateSudoku())));
+  let generatedPuzzle = generateSudoku();
+  // console.log(isSudokuValid(generatedPuzzle));
+  printPuzzle(generatedPuzzle);
+
+
+  let solvedPuzzle = backtrack(generatedPuzzle);
+  printPuzzle(solvedPuzzle);
   // console.log(suffle([1, 2, 3, 4, 5, 6, 7, 8, 9]));
-// 5--3--4--6--7--8--9--1--2--
-// 6--7--2--1--9--5--3--4--8--
-// 1--9--8--3--4--2--5--6--7--
-// 8--5--9--7--6--1--4--2--3--
-// 4--2--6--8--5--3--7--9--1--
-// 7--1--3--9--2--4--8--5--6--
-// 9--6--1--5--3--7--2--8--4--
-// 2--8--7--4--1--9--6--3--5--
-// 3--4--5--2--8--6--1--7--9--
+  // 5--3--4--6--7--8--9--1--2--
+  // 6--7--2--1--9--5--3--4--8--
+  // 1--9--8--3--4--2--5--6--7--
+  // 8--5--9--7--6--1--4--2--3--
+  // 4--2--6--8--5--3--7--9--1--
+  // 7--1--3--9--2--4--8--5--6--
+  // 9--6--1--5--3--7--2--8--4--
+  // 2--8--7--4--1--9--6--3--5--
+  // 3--4--5--2--8--6--1--7--9--
 
 
-  printPuzzle(backtrack(sudoku1));
+  // printPuzzle(backtrack(sudoku1));
 
 };  
