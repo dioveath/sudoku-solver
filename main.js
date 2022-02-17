@@ -1,5 +1,3 @@
-
-
 window.onload = () => {
   
   const canvas = document.getElementById("canvas"),
@@ -13,17 +11,23 @@ window.onload = () => {
   var block = {
     x: 0,
     y: 0,
+    i: 0,
+    j: 0,
     width: 64,
     height: 64,
     value: 0,
     isClicked: false,
+    isModifiable: false,
   };
 
+  var sudokuPuzzle = generateSudoku(2);
+  var sudokuBoard = buildSodukoBoard(sudokuPuzzle);
+
+  console.log(sudokuPuzzle);
+  console.log(sudokuBoard);
+
+  // inputs
   var currentActive = undefined;
-  
-
-  var soduko = buildSodukoBoard();
-
 
   update();
 
@@ -32,41 +36,43 @@ window.onload = () => {
     context.fillStyle = "black";
     context.fillRect(0, 0, width, height);
 
-    renderSodukoBoard();
+    renderSodukoBoard(sudokuBoard);
     requestAnimationFrame(update);
   }
 
   function checkInput(click){
     for(var i = 0; i < 9; i++){ 
       for(var j = 0; j < 9; j++){
-        var b = soduko[i][j];
+        var b = sudokuBoard[i][j];
+        if(!b.isModifiable) continue;
         if(pointRectCollision(click, b)) {
           b.isClicked = !b.isClicked;
           if(b.isClicked)
             currentActive = b;
-        } else {
-          b.isClicked = false;
+          else
+            currentActive = null;
+          return;
         }
-
       }
     }
+    currentActive = null;
   }
 
-  function buildSodukoBoard(){
+  function buildSodukoBoard(sudoku){
     var sodukoBoard = [];
-
-    // var soduko = createRandomSoduko();
-
     for(var i = 0; i < 9; i++){
       sodukoBoard[i] = new Array();
       for(var j = 0; j < 9; j++){
         var b = Object.create(block);
-
         var offx = width/2;
         var offy = height/2;
-        
+
+        b.value = sudoku[i][j] === undefined ? 0 : sudoku[i][j];
+        b.isModifiable = sudoku[i][j] == 0;
         b.x = offx + (j-4) * b.width - b.width/2;
         b.y = offy + (i-4) * b.height - b.height/2;
+        b.i = i;
+        b.j = j;
         sodukoBoard[i].push(b);
       }
     }
@@ -74,17 +80,16 @@ window.onload = () => {
     return sodukoBoard;
   }
 
-  function renderSodukoBoard(){
+  function renderSodukoBoard(sudokuBoard){
     for(var i = 0; i < 9; i++)
       for(var j = 0; j < 9; j++){
-        var b = soduko[i][j];
+        var b = sudokuBoard[i][j];
 
         context.strokeStyle = "white";
         context.lineWidth = 2;        
         context.strokeRect(b.x, b.y, b.width, b.height);
           
-
-        context.fillStyle = b.value ? "gray" : "black";
+        context.fillStyle = !b.isModifiable ? "gray" : b.value ? isValidMove(sudokuPuzzle, j, i, b.value) ? "lightblue" : "yellow" : "black";
         context.fillRect(b.x, b.y, b.width, b.height); 
 
         if(b == currentActive) {
@@ -101,7 +106,6 @@ window.onload = () => {
 
 
   // function createRandomSoduko(){
-
   //   return s;
   // }
 
@@ -142,8 +146,24 @@ window.onload = () => {
 
   document.addEventListener('mousemove', (e) => {
     e.preventDefault();
-  });  
+  });
 
+  document.addEventListener("keypress", (e) => {
+    if(currentActive != null){
+      let newValue = 0;
+      if(e.keyCode >= 48 && e.keyCode <= 57) {
+        newValue = e.keyCode - 48;
+      }
+      currentActive.value = newValue;
+      sudokuPuzzle[currentActive.i][currentActive.j] = newValue;
+      console.log(sudokuPuzzle);
+      currentActive = null;
+      if(isSudokuValid(sudokuPuzzle)){
+        console.log("solved!!!!");
+      }
+    }
+
+  });
 
 
 

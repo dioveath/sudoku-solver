@@ -1,4 +1,4 @@
-window.onload = () => {
+// window.onload = () => {
 
   function isSudokuValid(board){
     var sum = 45;
@@ -34,73 +34,43 @@ window.onload = () => {
     return puzzle;
   }
 
-  function generateSudoku(difficultyLevel = 20){
+function generateSudoku(dLevel = 20){
+  while(true){
+    let difficultyLevel = dLevel;
     let sudoku = [];
     for(let i = 0; i < 9; i++) {
       sudoku[i] = new Array();
       for(let j = 0; j < 9; j++)
-        sudoku[i][j] = [1, 2, 3, 4, 5, 6, 7, 8, 9];      
+        sudoku[i][j] = 0;
     }
 
     var backTrackedPuzzle = false;
-
     while(!backTrackedPuzzle) {
-      // initial random one seed on all 3x3 boxes
-      let iter = 2;
-      for(let k = 0; k < iter; k++){
-        for(let i = 0; i < 9; i+=3){
-          for(let j = 0; j < 9; j+=3){
-            let x = j + Math.floor(Math.random() * 3);
-            let y = i + Math.floor(Math.random() * 3);
-            let pValues = getPossibleValues(sudoku, x, y);
-            if(!(pValues instanceof Array)) continue;
-            if(pValues.length == 1) {
-              sudoku[y][x] = pValues[0];
-              continue;
-            }
-            let shuffleArray =suffle(pValues);
-            sudoku[y][x] = pValues[0];
-          }
-        }
-      }
-
-      for(let i = 0; i < 9; i++){
-        for(let j = 0; j < 9; j++){
-          if(sudoku[i][j] instanceof Array) {
-            sudoku[i][j] = 0;
-          }
-        }
-      }
-
       // backtracked puzzle
       backTrackedPuzzle = backtrack(sudoku);
     }
-
 
     let iteration = 10;
     for(let iter = 0; iter < iteration; iter++){
       for(let i = 0; i < 9; i+=3){
         for(let j = 0; j < 9; j+=3){
-          if(--difficultyLevel <= 0) return backTrackedPuzzle;
-
           let x = j + Math.floor(Math.random() * 3);
           let y = i + Math.floor(Math.random() * 3);
-
-          let temp = backTrackedPuzzle[y][x];
           backTrackedPuzzle[y][x] = 0;
-          let oneStepRemovedBackTracked = sudokuSolve(backTrackedPuzzle);
-          printPuzzle(oneStepRemovedBackTracked);
-          if(!isSudokuValid(oneStepRemovedBackTracked)) {
-            backTrackedPuzzle[y][x] = temp;
-            return backTrackedPuzzle;
+          if(backtrack(backTrackedPuzzle) == false) {
+            continue;
           }
+          console.log(difficultyLevel);
+          difficultyLevel--;
+          if(difficultyLevel <= 0) return backTrackedPuzzle;          
         }
       }
     }
 
+  }
+    
     // printPuzzle(backTrackedPuzzle);
-
-    return backTrackedPuzzle;
+    // return backTrackedPuzzle;
   }  
 
   function suffle(array){
@@ -147,35 +117,37 @@ window.onload = () => {
   }
 
   function isSudokuSolvable(board){
-    return isSudokuValid(sudoku(board));
+    return isSudokuValid(sudokuSolve(board));
   }
 
-  function sudoku(puzzle) {
-    var iteration = 20;
-    for(var iter = 0; iter < iteration; iter++){
-      for(var i = 0; i < 9; i++){
-	for(var j = 0; j < 9; j++){
-          if(puzzle[i][j] == 0 || puzzle[i][j] instanceof Array) {
-            var pValues = getPossibleValues(puzzle, j, i);
-            puzzle[i][j] = pValues.length == 1 ? pValues[0] : pValues;
-          }
-	}
-      }    
-    }
-    return puzzle;
-  }
+  // function sudoku(puzzle) {
+  //   var iteration = 20;
+  //   for(var iter = 0; iter < iteration; iter++){
+  //     for(var i = 0; i < 9; i++){
+  // 	for(var j = 0; j < 9; j++){
+  //         if(puzzle[i][j] == 0 || puzzle[i][j] instanceof Array) {
+  //           var pValues = getPossibleValues(puzzle, j, i);
+  //           puzzle[i][j] = pValues.length == 1 ? pValues[0] : pValues;
+  //         }
+  // 	}
+  //     }    
+  //   }
+  //   return puzzle;
+  // }
 
-  function isValidMove(puzzle, x, y, number){
-    if(puzzle[y][x] != 0) return true;
+function isValidMove(puzzle, x, y, number){
+    // if(puzzle[y][x] != 0) return ;
 
     for(let i = 0; i < 9; i++){
       if(puzzle[y][i] != 0 || puzzle[y][i] !== undefined)
-        if(puzzle[y][i] == number) {
+        if(puzzle[y][i] == number && i != x) {
+          console.log("returned vertical");
           return false;
         }
 
       if(puzzle[i][x] != 0 || puzzle[i][x] !== undefined)
-        if(puzzle[i][x] == number) {
+        if(puzzle[i][x] == number && i != y) {
+          console.log("returned from horizontal");          
           return false;
         }
 
@@ -183,7 +155,10 @@ window.onload = () => {
       let dy = Math.floor(y / 3) * 3 + Math.floor(i / 3);
 
       if(puzzle[dy][dx] != 0 || puzzle[dy][dx] !== undefined)
-        if(puzzle[dy][dx] == number) return false;
+        if(puzzle[dy][dx] == number && (dy != y || dx != x)) {
+          console.log("returned from diagonal");          
+          return false;
+        }
     }
 
     return true;
@@ -282,13 +257,13 @@ window.onload = () => {
   ];  
 
   // printPuzzle(sudoku(generateSudoku()));
-  let generatedPuzzle = generateSudoku();
+  // let generatedPuzzle = generateSudoku();
   // console.log(isSudokuValid(generatedPuzzle));
-  printPuzzle(generatedPuzzle);
+  // printPuzzle(generatedPuzzle);
 
 
-  let solvedPuzzle = backtrack(generatedPuzzle);
-  printPuzzle(solvedPuzzle);
+  // let solvedPuzzle = backtrack(generatedPuzzle);
+  // printPuzzle(solvedPuzzle);
   // console.log(suffle([1, 2, 3, 4, 5, 6, 7, 8, 9]));
   // 5--3--4--6--7--8--9--1--2--
   // 6--7--2--1--9--5--3--4--8--
@@ -299,8 +274,7 @@ window.onload = () => {
   // 9--6--1--5--3--7--2--8--4--
   // 2--8--7--4--1--9--6--3--5--
   // 3--4--5--2--8--6--1--7--9--
-
-
   // printPuzzle(backtrack(sudoku1));
+  
 
-};  
+// };
