@@ -56,11 +56,13 @@ function generateSudoku(dLevel = 20){
         for(let j = 0; j < 9; j+=3){
           let x = j + Math.floor(Math.random() * 3);
           let y = i + Math.floor(Math.random() * 3);
+          if(backTrackedPuzzle[y][x] == 0) continue;
+
           backTrackedPuzzle[y][x] = 0;
           if(backtrack(backTrackedPuzzle) == false) {
             continue;
           }
-          console.log(difficultyLevel);
+          // console.log(difficultyLevel);
           difficultyLevel--;
           if(difficultyLevel <= 0) return backTrackedPuzzle;          
         }
@@ -141,13 +143,13 @@ function isValidMove(puzzle, x, y, number){
     for(let i = 0; i < 9; i++){
       if(puzzle[y][i] != 0 || puzzle[y][i] !== undefined)
         if(puzzle[y][i] == number && i != x) {
-          console.log("returned vertical");
+          // console.log("returned vertical");
           return false;
         }
 
       if(puzzle[i][x] != 0 || puzzle[i][x] !== undefined)
         if(puzzle[i][x] == number && i != y) {
-          console.log("returned from horizontal");          
+          // console.log("returned from horizontal");          
           return false;
         }
 
@@ -156,7 +158,7 @@ function isValidMove(puzzle, x, y, number){
 
       if(puzzle[dy][dx] != 0 || puzzle[dy][dx] !== undefined)
         if(puzzle[dy][dx] == number && (dy != y || dx != x)) {
-          console.log("returned from diagonal");          
+          // console.log("returned from diagonal");          
           return false;
         }
     }
