@@ -46,6 +46,9 @@ window.onload = () => {
   var generateButton = Object.create(button);
   var diffLevelTextField = Object.create(textField);
 
+  // global states
+  var isSolved = false;
+
   init();
   update();
 
@@ -61,12 +64,23 @@ window.onload = () => {
   }
 
   function update(){
-
     context.fillStyle = "black";
     context.fillRect(0, 0, width, height);
 
     renderSodukoBoard(sudokuBoard);
     renderUIs();
+
+    if(isSolved) {
+      context.fillStyle = "#00000088";
+      context.fillRect(width/2 - 200, height/2 - 50, 400, 100);
+      context.fillStyle = "yellow";
+      context.font = "70px Inconsolata";
+      context.textAlign = "center";
+      context.textBaseline = "middle";    
+      context.fillText("YOU SOLVED", width/2, height/2);      
+    }
+
+
     requestAnimationFrame(update);
   }
 
@@ -100,15 +114,13 @@ window.onload = () => {
     if(pointRectCollision(click, generateButton)) {
       sudokuPuzzle = generateSudoku(diffLevelTextField.text);
       sudokuBoard = buildSodukoBoard(sudokuPuzzle);
+      isSolved = false;
     }
-
     if(pointRectCollision(click, diffLevelTextField)) {
       diffLevelTextField.isActive = true;
-      console.log("a");
     } else {
       diffLevelTextField.isActive = false;      
     }
-
 
   }
   
@@ -227,6 +239,7 @@ window.onload = () => {
       currentActive.isClicked = false;
       currentActive = null;
       if(isSudokuValid(sudokuPuzzle)){
+        isSolved = true;
         console.log("solved!!!!");
       }
     }
@@ -241,8 +254,6 @@ window.onload = () => {
         diffLevelTextField.text = diffLevelTextField.text.slice(0, -1);
       }
     }
-
-
   });
 
 
