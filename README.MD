@@ -1,7 +1,9 @@
 # Sudoku Generator
 Generates sudokus based on difficulty. Difficulty level is calculated as the number of space to fill in the puzzle.
 
-![Sudoku Generator](assets/demo1.png)
+<p align="center">
+<img alt="Sudoku Generator" width="50%" src="assets/sudoku_generator.png"/>
+</p>
 
 # Getting Started
 - Open index.html file. 

@@ -37,6 +37,7 @@ window.onload = () => {
     text: "TextField Text",
     isActive: false,
   };
+  let timer = 0;
 
   var sudokuPuzzle = generateSudoku(10);
   var sudokuBoard = buildSodukoBoard(sudokuPuzzle);
@@ -191,15 +192,27 @@ window.onload = () => {
     context.textBaseline = "middle";
     context.fillText(generateButton.text, generateButton.x + generateButton.width/2, generateButton.y + generateButton.height/2);
 
-    context.fillStyle = "#448811";
+
+    context.fillStyle = diffLevelTextField.isActive ? "#337711" : "#448811";
     context.fillRect(diffLevelTextField.x, diffLevelTextField.y, diffLevelTextField.width, diffLevelTextField.height);
     context.fillStyle = "white";
     context.font = "20px Inconsolata";
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillText(diffLevelTextField.label, diffLevelTextField.x + diffLevelTextField.width/2, diffLevelTextField.y - 20);        
-    context.fillText(diffLevelTextField.text, diffLevelTextField.x + diffLevelTextField.width/2, diffLevelTextField.y + diffLevelTextField.height/2);
+    context.fillText(diffLevelTextField.label, diffLevelTextField.x + diffLevelTextField.width/2, diffLevelTextField.y - 20);
+
+    let text = diffLevelTextField.text;
+
+    if(diffLevelTextField.isActive) {
+      timer += 0.016;
+      text += (timer > 0.5) ? "|" : " ";
+      if(timer > 1)
+        timer = 0;      
+    }
+
+    context.fillText(text, diffLevelTextField.x + diffLevelTextField.width/2, diffLevelTextField.y + diffLevelTextField.height/2);
   }
+
 
 
   function pointRectCollision(point, rect){
